@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>keithfry // Keith Fry — Director of Engineering</title>
+<meta name="description" content="Keith Fry — Director of Software Engineering. Platform architecture, AI integration, and a stack of after-hours maker projects." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=VT323&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0e0d;
+    --bg-elev: #0f1413;
+    --grid: rgba(80, 220, 160, 0.04);
+    --phosphor: #5fffae;
+    --phosphor-dim: #3da876;
+    --phosphor-glow: rgba(95, 255, 174, 0.55);
+    --amber: #ffb454;
+    --magenta: #ff5fa2;
+    --text: #c8d4cf;
+    --text-dim: #6f7c77;
+    --text-faint: #3a4441;
+    --border: #1d2624;
+    --border-bright: #2c3936;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 15px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Background atmosphere: subtle grid + scanlines + vignette */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        rgba(0,0,0,0) 0px,
+        rgba(0,0,0,0) 2px,
+        rgba(0,0,0,0.18) 3px,
+        rgba(0,0,0,0) 4px
+      ),
+      radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+    pointer-events: none;
+    z-index: 2;
+    mix-blend-mode: multiply;
+  }
+
+  /* Layout shell */
+  .frame {
+    position: relative;
+    z-index: 3;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 28px 80px;
+  }
+
+  /* Top status bar */
+  .statusbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    margin-bottom: 36px;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .statusbar .left { display: flex; gap: 18px; align-items: center; }
+  .statusbar .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--phosphor);
+    box-shadow: 0 0 8px var(--phosphor-glow);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
+  .statusbar .right { display: flex; gap: 18px; }
+  .statusbar .right span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Hero */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: linear-gradient(180deg, var(--bg-elev) 0%, var(--bg) 100%);
+    padding: 36px 36px 32px;
+    margin-bottom: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--phosphor), transparent);
+    opacity: 0.6;
+  }
+  .hero-prompt {
+    color: var(--phosphor-dim);
+    font-size: 12px;
+    margin-bottom: 12px;
+    letter-spacing: 0.08em;
+  }
+  .hero-prompt .arrow { color: var(--phosphor); }
+
+  .hero h1 {
+    font-family: 'VT323', monospace;
+    font-size: clamp(48px, 8vw, 96px);
+    line-height: 0.95;
+    color: var(--phosphor);
+    text-shadow:
+      0 0 8px var(--phosphor-glow),
+      0 0 24px rgba(95, 255, 174, 0.25);
+    letter-spacing: 0.01em;
+    margin-bottom: 6px;
+  }
+  .hero h1 .cursor {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.85em;
+    background: var(--phosphor);
+    box-shadow: 0 0 12px var(--phosphor-glow);
+    margin-left: 4px;
+    vertical-align: -8%;
+    animation: blink 1.05s steps(2, start) infinite;
+  }
+  @keyframes blink { to { visibility: hidden; } }
+
+  .hero h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--text);
+    margin-top: 18px;
+    max-width: 64ch;
+    line-height: 1.7;
+  }
+  .hero h2 .accent { color: var(--amber); }
+  .hero h2 .accent2 { color: var(--magenta); }
+
+  .hero-meta {
+    border-left: 1px solid var(--border-bright);
+    padding-left: 18px;
+    font-size: 11px;
+    color: var(--text-dim);
+    text-align: right;
+    line-height: 1.9;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .hero-meta strong { color: var(--text); font-weight: 500; }
+
+  /* Tagline marquee under hero */
+  .tagline {
+    border: 1px solid var(--border);
+    border-top: none;
+    background: var(--bg-elev);
+    padding: 12px 36px;
+    font-size: 12px;
+    color: var(--phosphor-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tagline .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border: 1px solid var(--phosphor-dim);
+    color: var(--phosphor);
+    border-radius: 2px;
+    font-size: 10px;
+  }
+
+  /* Section heading */
+  .section { margin-bottom: 56px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 10px;
+  }
+  .section-head .num {
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    color: var(--amber);
+  }
+  .section-head .title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--text);
+  }
+  .section-head .meta {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.1em;
+  }
+
+  /* Stat strip */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .stat {
+    padding: 22px 20px;
+    border-right: 1px solid var(--border);
+    background: var(--bg-elev);
+    transition: background 0.2s;
+  }
+  .stat:last-child { border-right: none; }
+  .stat:hover { background: #131918; }
+  .stat .num {
+    font-family: 'VT323', monospace;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--phosphor);
+    text-shadow: 0 0 6px var(--phosphor-glow);
+  }
+  .stat .label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Project grid */
+  .projects {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .project {
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    padding: 22px 22px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s, background 0.2s;
+  }
+  .project:hover {
+    border-color: var(--phosphor-dim);
+    transform: translateY(-2px);
+    background: #131918;
+  }
+  .project::after {
+    content: "↗";
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    color: var(--text-faint);
+    font-size: 16px;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .project:hover::after { color: var(--phosphor); transform: translate(2px, -2px); }
+  .project .name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .project .name .slash { color: var(--text-faint); }
+  .project .name .repo { color: var(--phosphor); }
+  .project .desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    line-height: 1.55;
+    max-width: 42ch;
+  }
+  .project .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .project .tag {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+    border: 1px solid var(--border-bright);
+    padding: 2px 7px;
+    border-radius: 2px;
+  }
+  .project .tag.lang-java { color: #ff8866; }
+  .project .tag.lang-c { color: #88aaff; }
+  .project .tag.lang-py { color: var(--phosphor); }
+  .project .tag.lang-js { color: var(--amber); }
+
+  /* About / signal block */
+  .about {
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    border-radius: 4px;
+    padding: 28px 32px;
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--text);
+    position: relative;
+  }
+  .about::before {
+    content: "// SIGNAL";
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    background: var(--bg);
+    padding: 0 8px;
+    font-size: 10px;
+    color: var(--phosphor-dim);
+    letter-spacing: 0.15em;
+  }
+  .about p + p { margin-top: 14px; }
+  .about .hl { color: var(--phosphor); }
+  .about .hl-2 { color: var(--amber); }
+  .about .hl-3 { color: var(--magenta); }
+
+  /* Stack tags */
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .stack span {
+    font-size: 11px;
+    padding: 5px 10px;
+    border: 1px solid var(--border-bright);
+    border-radius: 2px;
+    color: var(--text-dim);
+    background: var(--bg-elev);
+    transition: all 0.2s;
+  }
+  .stack span:hover {
+    color: var(--phosphor);
+    border-color: var(--phosphor-dim);
+  }
+
+  /* Contact / footer */
+  .contact {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .contact a {
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    padding: 18px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+    display: block;
+  }
+  .contact a:hover {
+    border-color: var(--phosphor-dim);
+    background: #131918;
+    transform: translateY(-2px);
+  }
+  .contact .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    letter-spacing: 0.15em;
+    margin-bottom: 6px;
+  }
+  .contact .value {
+    font-size: 14px;
+    color: var(--phosphor);
+    font-weight: 500;
+  }
+  .contact .arrow {
+    float: right;
+    color: var(--text-faint);
+    transition: color 0.2s, transform 0.2s;
+  }
+  .contact a:hover .arrow {
+    color: var(--phosphor);
+    transform: translate(2px, -2px);
+  }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  footer .blink { animation: pulse 2s ease-in-out infinite; }
+
+  /* Reveal animation */
+  .reveal { opacity: 0; transform: translateY(8px); animation: reveal 0.7s ease forwards; }
+  .reveal-1 { animation-delay: 0.05s; }
+  .reveal-2 { animation-delay: 0.18s; }
+  .reveal-3 { animation-delay: 0.30s; }
+  .reveal-4 { animation-delay: 0.42s; }
+  .reveal-5 { animation-delay: 0.54s; }
+  .reveal-6 { animation-delay: 0.66s; }
+  .reveal-7 { animation-delay: 0.78s; }
+  .reveal-8 { animation-delay: 0.90s; }
+  @keyframes reveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile */
+  @media (max-width: 760px) {
+    .frame { padding: 20px 16px 60px; }
+    .hero { grid-template-columns: 1fr; padding: 28px 22px 24px; }
+    .hero-meta { border-left: none; border-top: 1px solid var(--border-bright); padding-left: 0; padding-top: 14px; text-align: left; }
+    .tagline { padding: 12px 22px; flex-direction: column; align-items: flex-start; gap: 6px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(2) { border-right: none; }
+    .stat:nth-child(1), .stat:nth-child(2) { border-bottom: 1px solid var(--border); }
+    .projects { grid-template-columns: 1fr; }
+    .contact { grid-template-columns: 1fr; }
+    .statusbar .right { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="frame">
+
+  <!-- STATUS BAR -->
+  <div class="statusbar reveal reveal-1">
+    <div class="left">
+      <span class="dot"></span>
+      <span>session // active</span>
+      <span style="color: var(--text-faint);">·</span>
+      <span>github.com/keithfry</span>
+    </div>
+    <div class="right">
+      <span>uptime: 20+ yrs</span>
+      <span style="color: var(--text-faint);">·</span>
+      <span>patents: 11</span>
+      <span style="color: var(--text-faint);">·</span>
+      <span>location: rochester hills, mi</span>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero reveal reveal-2">
+    <div>
+      <div class="hero-prompt">
+        <span class="arrow">&gt;</span> whoami --verbose
+      </div>
+      <h1>keith fry<span class="cursor"></span></h1>
+      <h2>
+        <span class="accent">Director of Software Engineering</span> · 20+ years building
+        platforms that don't fall over at 3 AM. <span class="accent2">Complex systems fail.</span>
+        I build ones that scale.
+      </h2>
+    </div>
+    <div class="hero-meta">
+      <strong>ROLE</strong><br/>
+      Eng. leadership<br/>
+      Platform architect<br/><br/>
+      <strong>FOCUS</strong><br/>
+      Platforms · AI<br/>
+      Distributed systems
+    </div>
+  </section>
+
+  <div class="tagline reveal reveal-2">
+    <span>// craft and chaos management — fintech · automotive · platform · ai</span>
+    <span class="pill">open to remote roles</span>
+  </div>
+
+  <!-- STATS -->
+  <section class="section reveal reveal-3">
+    <div class="section-head">
+      <span class="num">01</span>
+      <span class="title">By the numbers</span>
+      <span class="meta">$ wc -l ~/career</span>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="num">20+</div>
+        <div class="label">Years shipping</div>
+      </div>
+      <div class="stat">
+        <div class="num">11</div>
+        <div class="label">Patents granted</div>
+      </div>
+      <div class="stat">
+        <div class="num">13</div>
+        <div class="label">Public repos</div>
+      </div>
+      <div class="stat">
+        <div class="num">∞</div>
+        <div class="label">After-hours builds</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section reveal reveal-4">
+    <div class="section-head">
+      <span class="num">02</span>
+      <span class="title">// signal</span>
+      <span class="meta">$ cat about.md</span>
+    </div>
+    <div class="about">
+      <p>
+        Director of Engineering with a career split between
+        <span class="hl">FinTech</span>, <span class="hl-2">automotive (GM)</span>, and
+        platform engineering. I lead teams, architect platforms, and stay close enough
+        to the keyboard to be dangerous.
+      </p>
+      <p>
+        Currently deep in <span class="hl-3">AI integration</span> — building local model
+        pipelines, evaluating LLM gateways, and shipping production systems on AWS
+        (ECS Fargate, Aurora, Terraform, the works). After hours, I run
+        <span class="hl">FryByNite</span> with my wife Tracey — a quality-first independent
+        software venture and the home of the maker projects below.
+      </p>
+    </div>
+  </section>
+
+  <!-- FRYBYNITE -->
+  <section class="section reveal reveal-5">
+    <div class="section-head">
+      <span class="num">03</span>
+      <span class="title">FryByNite // active builds</span>
+      <span class="meta">$ ls -la ~/frybynite</span>
+    </div>
+    <div class="projects">
+      <a class="project" href="https://github.com/frybynite/image-cloud" target="_blank" rel="noopener">
+        <div class="name"><span class="slash">frybynite/</span><span class="repo">image-cloud</span></div>
+        <div class="desc">A TypeScript library for animated, interactive image clouds — multiple layout algorithms (radial, spiral, honeycomb, wave), zoom/focus interactions, and React, Vue, and Web Component wrappers. Zero runtime dependencies.</div>
+        <div class="tags"><span class="tag lang-js">TypeScript</span><span class="tag">Library</span><span class="tag">React · Vue</span><span class="tag">npm</span></div>
+      </a>
+
+      <a class="project" href="https://github.com/frybynite/ai-custom-prompts" target="_blank" rel="noopener">
+        <div class="name"><span class="slash">frybynite/</span><span class="repo">ai-custom-prompts</span></div>
+        <div class="desc">A Chrome extension that pipes selected text into ChatGPT, Gemini, custom GPTs, or Gems via configurable prompts and keyboard shortcuts. Up to 10 menus, drag-to-reorder, import/export — published on the Chrome Web Store.</div>
+        <div class="tags"><span class="tag lang-js">JavaScript</span><span class="tag">Chrome Ext</span><span class="tag">AI</span><span class="tag">Web Store</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="section reveal reveal-6">
+    <div class="section-head">
+      <span class="num">04</span>
+      <span class="title">Personal Projects</span>
+      <span class="meta">$ ls -la ~/github</span>
+    </div>
+    <div class="projects">
+      <a class="project" href="https://github.com/keithfry/visor-controller" target="_blank" rel="noopener">
+        <div class="name"><span class="slash">keithfry/</span><span class="repo">visor-controller</span></div>
+        <div class="desc">Embedded firmware for a wearable cosplay visor — built for competition, runs on tight power budgets, looks great in low light.</div>
+        <div class="tags"><span class="tag lang-c">C</span><span class="tag">Embedded</span><span class="tag">Wearable</span></div>
+      </a>
+
+      <a class="project" href="https://github.com/keithfry/visor-android" target="_blank" rel="noopener">
+        <div class="name"><span class="slash">keithfry/</span><span class="repo">visor-android</span></div>
+        <div class="desc">Android companion app for the visor — Bluetooth control, color presets, and pattern programming from the wrist.</div>
+        <div class="tags"><span class="tag lang-java">Java</span><span class="tag">Android</span><span class="tag">BLE</span></div>
+      </a>
+
+      <a class="project" href="https://github.com/keithfry/dress-controller" target="_blank" rel="noopener">
+        <div class="name"><span class="slash">keithfry/</span><span class="repo">dress-controller</span></div>
+        <div class="desc">Microcontroller firmware driving an LED-laden cosplay dress. Choreographed lighting, low latency, and zero wardrobe malfunctions.</div>
+        <div class="tags"><span class="tag lang-c">C</span><span class="tag">Embedded</span><span class="tag">Cosplay</span></div>
+      </a>
+
+      <a class="project" href="https://github.com/keithfry/dress-android" target="_blank" rel="noopener">
+        <div class="name"><span class="slash">keithfry/</span><span class="repo">dress-android</span></div>
+        <div class="desc">The Android-side partner to the dress firmware — pattern picker, brightness, and live remote control over Bluetooth.</div>
+        <div class="tags"><span class="tag lang-java">Java</span><span class="tag">Android</span><span class="tag">BLE</span></div>
+      </a>
+
+      <a class="project" href="https://github.com/keithfry/robokart-android-bluetooth" target="_blank" rel="noopener">
+        <div class="name"><span class="slash">keithfry/</span><span class="repo">robokart-android-bluetooth</span></div>
+        <div class="desc">RC kart driven from an Android phone over Bluetooth. Because every Director of Engineering needs a kart they can drive from their pocket.</div>
+        <div class="tags"><span class="tag lang-java">Java</span><span class="tag">Robotics</span><span class="tag">RC</span></div>
+      </a>
+
+      <a class="project" href="https://github.com/keithfry/healthcare-agent" target="_blank" rel="noopener">
+        <div class="name"><span class="slash">keithfry/</span><span class="repo">healthcare-agent</span></div>
+        <div class="desc">Capstone project for the Generative AI Specialization — an AI agent built around healthcare workflows. Applied coursework on LLMs, prompting, and agent design to a real domain problem.</div>
+        <div class="tags"><span class="tag lang-py">Python</span><span class="tag">GenAI</span><span class="tag">Agent</span><span class="tag">Capstone</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section class="section reveal reveal-7">
+    <div class="section-head">
+      <span class="num">05</span>
+      <span class="title">Stack &amp; tooling</span>
+      <span class="meta">$ env | grep -i tools</span>
+    </div>
+    <div class="stack">
+      <span>Java</span>
+      <span>Spring Boot</span>
+      <span>Python</span>
+      <span>Flask</span>
+      <span>FastAPI</span>
+      <span>React</span>
+      <span>PostgreSQL</span>
+      <span>AWS</span>
+      <span>ECS Fargate</span>
+      <span>Aurora</span>
+      <span>Terraform</span>
+      <span>Docker</span>
+      <span>Ollama</span>
+      <span>OpenRouter</span>
+      <span>LiteLLM</span>
+      <span>MCP</span>
+      <span>Claude Code</span>
+      <span>n8n</span>
+      <span>TensorFlow</span>
+      <span>Arduino</span>
+      <span>C / Embedded</span>
+      <span>Android / BLE</span>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section reveal reveal-8">
+    <div class="section-head">
+      <span class="num">06</span>
+      <span class="title">Open a channel</span>
+      <span class="meta">$ ./connect</span>
+    </div>
+    <div class="contact">
+      <a href="https://www.keithfry.net" target="_blank" rel="noopener">
+        <div class="label">Personal site</div>
+        <div class="value">keithfry.net <span class="arrow">↗</span></div>
+      </a>
+      <a href="https://www.linkedin.com/in/keith-fry/" target="_blank" rel="noopener">
+        <div class="label">LinkedIn</div>
+        <div class="value">/in/keith-fry <span class="arrow">↗</span></div>
+      </a>
+      <a href="mailto:keithfry@gmail.com">
+        <div class="label">Email</div>
+        <div class="value">keithfry@gmail.com <span class="arrow">↗</span></div>
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    <div>© <span id="year"></span> Keith Fry · FryByNite</div>
+    <div><span class="blink">●</span> &nbsp;built late at night</div>
+  </footer>
+
+</div>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
